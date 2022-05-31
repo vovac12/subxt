@@ -24,14 +24,9 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    sp_core::{
-        sr25519,
-        Pair,
-    },
+    sp_core::{sr25519, Pair},
     sp_runtime::AccountId32,
-    ClientBuilder,
-    DefaultConfig,
-    PolkadotExtrinsicParams,
+    ClientBuilder, DefaultConfig, PolkadotExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -46,7 +41,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    let era = api.storage().staking().active_era(None).await?.unwrap();
+    let era = api
+        .storage()
+        .staking()
+        .active_era(true, None)
+        .await?
+        .unwrap();
     println!(
         "Staking active era: index: {:?}, start: {:?}",
         era.index, era.start
@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let controller_acc = api
         .storage()
         .staking()
-        .bonded(&alice_stash_id, None)
+        .bonded(true, &alice_stash_id, None)
         .await?
         .unwrap();
     println!("    account controlled by: {:?}", controller_acc);
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let era_result = api
         .storage()
         .staking()
-        .eras_reward_points(&era.index, None)
+        .eras_reward_points(true, &era.index, None)
         .await?;
     println!("Era reward points: {:?}", era_result);
 

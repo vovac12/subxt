@@ -23,12 +23,7 @@
 //! ```
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    ClientBuilder,
-    DefaultConfig,
-    PairSigner,
-    PolkadotExtrinsicParams,
-};
+use subxt::{ClientBuilder, DefaultConfig, PairSigner, PolkadotExtrinsicParams};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -47,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hash = api
         .tx()
         .balances()
-        .transfer(dest, 123_456_789_012_345)?
+        .transfer(true, dest, 123_456_789_012_345)?
         .sign_and_submit_default(&signer)
         .await?;
 

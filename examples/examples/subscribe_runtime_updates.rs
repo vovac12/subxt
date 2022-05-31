@@ -24,12 +24,7 @@
 
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
-use subxt::{
-    ClientBuilder,
-    DefaultConfig,
-    PairSigner,
-    PolkadotExtrinsicParams,
-};
+use subxt::{ClientBuilder, DefaultConfig, PairSigner, PolkadotExtrinsicParams};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -64,6 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .tx()
             .balances()
             .transfer(
+                true,
                 AccountKeyring::Bob.to_account_id().into(),
                 123_456_789_012_345,
             )

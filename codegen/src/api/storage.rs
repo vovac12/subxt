@@ -16,25 +16,14 @@
 
 use crate::types::TypeGenerator;
 use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    PalletMetadata,
-    PalletStorageMetadata,
-    StorageEntryMetadata,
-    StorageEntryModifier,
-    StorageEntryType,
-    StorageHasher,
+    v14::RuntimeMetadataV14, PalletMetadata, PalletStorageMetadata, StorageEntryMetadata,
+    StorageEntryModifier, StorageEntryType, StorageHasher,
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
-use quote::{
-    format_ident,
-    quote,
-};
-use scale_info::{
-    form::PortableForm,
-    TypeDef,
-};
+use quote::{format_ident, quote};
+use scale_info::{form::PortableForm, TypeDef};
 
 pub fn generate_storage(
     metadata: &RuntimeMetadataV14,
@@ -232,12 +221,10 @@ fn generate_storage_entry_fns(
         StorageEntryModifier::Default => {
             (quote!( #storage_entry_value_ty ), quote!(fetch_or_default))
         }
-        StorageEntryModifier::Optional => {
-            (
-                quote!( ::core::option::Option<#storage_entry_value_ty> ),
-                quote!(fetch),
-            )
-        }
+        StorageEntryModifier::Optional => (
+            quote!( ::core::option::Option<#storage_entry_value_ty> ),
+            quote!(fetch),
+        ),
     };
 
     let (lifetime_param, reference, anon_lifetime) = if should_ref {
@@ -269,6 +256,7 @@ fn generate_storage_entry_fns(
             #docs_token
             pub async fn #fn_name_iter(
                 &self,
+                check_metadata: bool,
                 block_hash: ::core::option::Option<T::Hash>,
             ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError> {
                 let runtime_storage_hash = {
@@ -276,7 +264,7 @@ fn generate_storage_entry_fns(
                     let metadata = locked_metadata.read();
                     metadata.storage_hash::<#entry_struct_ident>()?
                 };
-                if runtime_storage_hash == [#(#storage_hash,)*] {
+                if !check_metadata || runtime_storage_hash == [#(#storage_hash,)*] {
                     self.client.storage().iter(block_hash).await
                 } else {
                     Err(::subxt::MetadataError::IncompatibleMetadata.into())
@@ -302,6 +290,7 @@ fn generate_storage_entry_fns(
         #docs_token
         pub async fn #fn_name(
             &self,
+            check_metadata: bool,
             #( #key_args, )*
             block_hash: ::core::option::Option<T::Hash>,
         ) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
@@ -310,7 +299,7 @@ fn generate_storage_entry_fns(
                 let metadata = locked_metadata.read();
                 metadata.storage_hash::<#entry_struct_ident>()?
             };
-            if runtime_storage_hash == [#(#storage_hash,)*] {
+            if !check_metadata || runtime_storage_hash == [#(#storage_hash,)*] {
                 let entry = #constructor;
                 self.client.storage().#fetch(&entry, block_hash).await
             } else {

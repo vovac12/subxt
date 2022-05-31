@@ -25,14 +25,8 @@
 use codec::Decode;
 use subxt::{
     rpc::Rpc,
-    storage::{
-        StorageClient,
-        StorageKeyPrefix,
-    },
-    ClientBuilder,
-    DefaultConfig,
-    PolkadotExtrinsicParams,
-    StorageEntryKey,
+    storage::{StorageClient, StorageKeyPrefix},
+    ClientBuilder, DefaultConfig, PolkadotExtrinsicParams, StorageEntryKey,
     StorageMapKey,
 };
 
@@ -107,7 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut iter = api
             .storage()
             .xcm_pallet()
-            .version_notifiers_iter(None)
+            .version_notifiers_iter(true, None)
             .await?;
 
         println!("\nExample 3. Obtained keys:");

@@ -14,25 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::types::{
-    CompositeDefFields,
-    TypeGenerator,
-};
-use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    PalletCallMetadata,
-    PalletMetadata,
-};
-use heck::{
-    ToSnakeCase as _,
-    ToUpperCamelCase as _,
-};
+use crate::types::{CompositeDefFields, TypeGenerator};
+use frame_metadata::{v14::RuntimeMetadataV14, PalletCallMetadata, PalletMetadata};
+use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
-use quote::{
-    format_ident,
-    quote,
-};
+use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
 
 pub fn generate_calls(
@@ -98,6 +85,7 @@ pub fn generate_calls(
                 #docs
                 pub fn #fn_name(
                     &self,
+                    check_metadata: bool,
                     #( #call_fn_args, )*
                 ) -> Result<::subxt::SubmittableExtrinsic<'a, T, X, #struct_name, DispatchError, root_mod::Event>, ::subxt::BasicError> {
                     let runtime_call_hash = {
@@ -105,7 +93,7 @@ pub fn generate_calls(
                         let metadata = locked_metadata.read();
                         metadata.call_hash::<#struct_name>()?
                     };
-                    if runtime_call_hash == [#(#call_hash,)*] {
+                    if !check_metadata || runtime_call_hash == [#(#call_hash,)*] {
                         let call = #struct_name { #( #call_args, )* };
                         Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
                     } else {

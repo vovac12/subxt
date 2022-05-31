@@ -15,18 +15,11 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::types::TypeGenerator;
-use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    PalletConstantMetadata,
-    PalletMetadata,
-};
+use frame_metadata::{v14::RuntimeMetadataV14, PalletConstantMetadata, PalletMetadata};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
-use quote::{
-    format_ident,
-    quote,
-};
+use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
 
 pub fn generate_constants(
@@ -48,10 +41,10 @@ pub fn generate_constants(
 
         quote! {
             #( #[doc = #docs ] )*
-            pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
+            pub fn #fn_name(&self, check_metadata: bool) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
                 let locked_metadata = self.client.metadata();
                 let metadata = locked_metadata.read();
-                if metadata.constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
+                if !check_metadata || metadata.constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
                     let pallet = metadata.pallet(#pallet_name)?;
                     let constant = pallet.constant(#constant_name)?;
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
