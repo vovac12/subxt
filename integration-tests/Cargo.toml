@@ -23,7 +23,7 @@ hex = "0.4.3"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "6.0.0", default-features = false  }
 sp-keyring = "6.0.0"
-sp-runtime = "6.0.0"
+sp-runtime = "14.0.0"
 subxt = { version = "0.21.0", path = "../subxt" }
 test-runtime = { path = "../test-runtime" }
 tokio = { version = "1.8", features = ["macros", "time"] }
